@@ -1,0 +1,74 @@
+{
+  "name": "kue",
+  "image": "ghcr.io/bcachet/containers/dev:latest",
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.m2/settings.xml",
+      "target": "/home/vscode/.m2/settings.xml",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.lein/profiles.clj",
+      "target": "/home/vscode/.lein/profiles.clj",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.var/app/com.bitwarden.desktop/data/.bitwarden-ssh-agent.sock",
+      "target": "/home/vscode/.bitwarden-ssh-agent.sock",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.pki",
+      "target": "/home/vscode/.pki",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.config/restish",
+      "target": "/home/vscode/.config/restish",
+      "type": "bind"
+    },
+    {
+      "source": "${localEnv:HOME}/.cache/restish",
+      "target": "/home/vscode/.cache/restish",
+      "type": "bind"
+    },
+  ],
+  "remoteEnv": {
+    "SSH_AUTH_SOCK": "/home/vscode/.bitwarden-ssh-agent.sock",
+    "SHELL": "/usr/bin/fish",
+    "JAVA_HOME": "/home/vscode/.local/share/mise/installs/java/latest",
+    "ENABLE_LSP_TOOL": "1"
+  },
+  "postCreateCommand": "/home/vscode/.local/bin/mise trust --yes --quiet && /home/vscode/.local/bin/mise install --yes",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker": {},
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode-remote.remote-containers",
+        "github.vscode-pull-request-github",
+        "github.vscode-github-actions",
+        "hverlin.mise-vscode",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "redhat.vscode-yaml",
+        "kilocode.kilo-code",
+        "anthropic.claude-code",
+        "golang.go",
+        "betterthantomorrow.calva",
+        "ms-python.python",
+        "Shopify.ruby-extensions-pack",
+        "cuelangorg.vscode-cue"
+      ]
+    },
+    "settings": {
+      "go.lintTool": "golangci-lint",
+      "go.alternateTools": {
+        "go": "/home/vscode/.local/share/mise/installs/go/latest/bin/go",
+        "gopls": "/home/vscode/.local/share/mise/installs/go-golang-org-x-tools-gopls/latest/bin/gopls",
+        "dlv": "/home/vscode/.local/share/mise/installs/go-github-com-go-delve-delve-cmd-dlv/latest/bin/dlv"
+      }
+    }
+  }
+}
