@@ -1,43 +1,45 @@
 package workloads
 
 import (
-    "encoding/json"
+	"encoding/json"
 	schemas "github.com/bcachet/kue/schemas:schemas"
 )
 
 workloads: schemas.#Workloads & {
 	redis: schemas.#Workload & {
 		container: {
-            image: name: "redis"
-            probes: liveness: {
-                type: "http"
-                path: "/live"
-                port: 6379
-            }
-            configs: redis: schemas.#Config & {
-                data: json.Marshal(
-                {
-                    foo: "bar"
-                })
-                mount: "/etc/redis/redis.json"
-            }
-            volumes: data: schemas.#VolumePersistent & {
-                mount: "/data"
-            }
-            secrets: creds: schemas.#SecretFile & {
-                path:   "redis/password"
-		  	    mount:  "/run/secrets/redis_password"
-            }
+			image: name: "redis"
+			probes: liveness: {
+				httpGet: {
+					port: 6379
+				}
+			}
+			configs: redis: schemas.#Config & {
+				data: json.Marshal(
+					{
+						foo: "bar"
+					})
+				mount: "/etc/redis/redis.json"
+			}
+			volumes: {
+				data: schemas.#VolumePersistent & {
+					mount: "/data"
+				}
+				creds: schemas.#VolumeSecret & {
+					path:  "redis/password"
+					mount: "/run/secrets/redis_password"
+				}
+			}
 		}
 
 		endpoints: [
-            {
-			    port: 6379
-                certificate: {
-                    commonName: "redis.default.svc.cluster.local"
-			    	altNames: ["redis", "localhost"]
-                }
-    		}
-        ]
+			{
+				port: 6379
+				certificate: {
+					commonName: "redis.default.svc.cluster.local"
+					altNames: ["redis", "localhost"]
+				}
+			},
+		]
 	}
 }

@@ -16,3 +16,5 @@
 !workloads/
 !workloads/*.cue
 
+!backends/
+!backends/*.cue

@@ -1,5 +1,9 @@
 package schemas
 
+import (
+	core "cue.dev/x/k8s.io/api/core/v1"
+)
+
 #Workloads: [Name=string]: #Workload & {
 	name: Name
 }
@@ -14,11 +18,25 @@ package schemas
     image!:   #Image
     command?: [...string]
 	args?:    [...string]
-    env?:     [string]: string
-    probes:   [#ProbeType]: #Probe
+    env?:     [string]: #Env
+    probes:   [#ProbeType]: core.#Probe
     configs:  [string]: #Config
-	secrets:  [string]: #Secret
 	volumes:  [string]: #Volume
+}
+
+#Env: {
+	type!: string | "secret" | "static"
+	if type == "secret" {
+		kv!: string
+	}
+}
+
+#EnvStatic: #Env & {
+	type: "static"
+}
+
+#EnvSecret: #Env & {
+	type: "secret"
 }
 
 #Image: {
@@ -28,12 +46,19 @@ package schemas
 }
 
 #Volume: {
+	type!: "ephemeral" | "persistent" | "bind" | "secret"
     mount!: string
-    type!: "ephemeral" | "persistent" | "bind"
+    mode:   int | *0o400
+
     if type == "bind" {
         source!: string
     }
 
+	if type == "secret" {
+		path!: string
+		engine: string | *"kv"
+		template?: string
+	}
 }
 
 #VolumeEphemeral: #Volume & {
@@ -48,28 +73,9 @@ package schemas
     type: "bind"
 }
 
-#Secret: {
-    path!:     string
-	type!:     "env" | "file"
-	template?: string
-	if type == "file" {
-		mount!:  string
-		mode:   int | *0o400
-	}
-	if type == "env" {
-		name!: string
-	}
-    engine:    string | *"kv"
+#VolumeSecret: #Volume & {
+	type: "secret"
 }
-
-#SecretEnv: #Secret & {
-	type: "env"
-}
-
-#SecretFile: #Secret & {
-	type: "file"
-}
-
 
 #Config: {
     data!: string | bytes
@@ -90,49 +96,3 @@ package schemas
 
 #ProbeType: "liveness" | "readiness" | "startup"
 
-#Probe: {
-    type!: "http" | "tcp" | "grpc" | "exec"
-
-	if type != "exec" {
-	    port: int
-	}
-
-	initialDelaySeconds: int & >=0 | *1
-	periodSeconds:       int & >=1 | *10
-	timeoutSeconds:      int & >=1 | *1
-	successThreshold:    int & >=1 | *1
-	failureThreshold:    int & >=1 | *3
-
-	if type == "http" {
-		path!:   string
-		scheme: *"HTTP" | "HTTPS"
-		httpHeaders?: [...{
-			name:  string
-			value: string
-		}]
-	}
-
-	if type == "grpc" {
-		service?: string
-	}
-
-	if type == "exec" {
-		command!: [...string]
-	}
-}
-
-#ProbeHttp: #Probe & {
-	type: "http"
-}
-
-#ProbeGrpc: #Probe & {
-	type: "grpc"
-}
-
-#ProbeTcp: #Probe & {
-	type: "tcp"
-}
-
-#ProbeExec: #Probe & {
-	type: "exec"
-}
