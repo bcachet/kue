@@ -19,31 +19,12 @@ import (
 	image!: #Image
 	command?: [...string]
 	args?: [...string]
-	envs?: [Name=string]: #Env & {
-		name: Name
-	}
+	envs?: [Name=string]: #Env
 	probes: [#ProbeType]: core.#Probe
 	configs: [string]:    #Config
 	volumes: [string]:    #Volume
 	resources?: core.#ResourceRequirements
 	security?: core.#SecurityContext
-}
-
-#Env: {
-	name!: string
-	...
-}
-
-#EnvConstant: #Env & {
-	value: string
-}
-
-#EnvDownward: #Env & {
-	valueFrom: string
-}
-
-#EnvSecret: #Env & {
-	secret: #Secret
 }
 
 #Image: {
@@ -52,29 +33,6 @@ import (
 	tag:      string | *"latest"
 }
 
-#Volume: {
-	mount!: string
-	mode:   int | *0o400
-	...
-}
-
-#VolumeBind: #Volume & {
-	source!: string
-}
-
-#VolumeSecret: #Volume & {
-	secret: #Secret
-}
-
-#VolumeEphemeral: #Volume & {
-	sizeLimit: resource.#Quantity
-}
-
-#Secret: {
-	kv!:     string
-	engine:    string | *"kv"
-	template?: string
-}
 
 #Config: {
 	data!:  string | bytes
@@ -94,3 +52,45 @@ import (
 }
 
 #ProbeType: "liveness" | "readiness" | "startup"
+#Probe:core.#Probe
+
+#Env: {
+	...
+}
+
+#EnvConstant: #Env & {
+	value: string
+}
+
+#EnvDownward: #Env & {
+	valueFrom: string
+}
+
+// #EnvSecret: #Env & {
+// 	secret: #Secret
+// }
+
+
+#Volume: {
+	mount!: string
+	mode:   int | *0o400
+	...
+}
+
+#VolumeBind: #Volume & {
+	source!: string
+}
+
+// #VolumeSecret: #Volume & {
+// 	secret: #Secret
+// }
+
+#VolumeEphemeral: #Volume & {
+	sizeLimit: resource.#Quantity
+}
+
+// #Secret: {
+// 	kv!:     string
+// 	engine:    string | *"kv"
+// 	template?: string
+// }
