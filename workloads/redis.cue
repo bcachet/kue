@@ -52,6 +52,9 @@ workloads: {
 					port: 6379
 				}
 			}
+			security: {
+				runAsUser: 1394
+			}
 		}
 
 		endpoints: [
@@ -63,5 +66,6 @@ workloads: {
 				}
 			},
 		]
+
 	}
 }

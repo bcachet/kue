@@ -2,6 +2,7 @@ package schemas
 
 import (
 	core "cue.dev/x/k8s.io/api/core/v1"
+	resource "cue.dev/x/k8s.io/apimachinery/pkg/api/resource"
 )
 
 #Workloads: [Name=string]: #Workload & {
@@ -25,6 +26,7 @@ import (
 	configs: [string]:    #Config
 	volumes: [string]:    #Volume
 	resources?: core.#ResourceRequirements
+	security?: core.#SecurityContext
 }
 
 #Env: {
@@ -62,6 +64,10 @@ import (
 
 #VolumeSecret: #Volume & {
 	secret: #Secret
+}
+
+#VolumeEphemeral: #Volume & {
+	sizeLimit: resource.#Quantity
 }
 
 #Secret: {

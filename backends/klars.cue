@@ -108,6 +108,7 @@ volumes: {
 					if volume["source"] == _|_ {
 						emptyDir: {
 							medium: "Memory"
+							sizeLimit: *volume.sizeLimit | 5Mi
 						}
 					}
 				}
@@ -136,6 +137,9 @@ containers: {
 				resources: _container.resources
 			}
 			volumeMounts: _volumeMounts
+			if _container["security"] != _|_ {
+				securityContext: _container.security
+			}
 		}
 	}
 }
