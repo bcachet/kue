@@ -1,7 +1,7 @@
 package schemas
 
 #Secret: {
-	kv!:       string
+	path!:     string
 	engine:    string | *"kv"
 	template?: string
 }

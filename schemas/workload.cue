@@ -1,11 +1,8 @@
 package schemas
 
-#Workloads: [Name=string]: #Workload & {
-	name: Name
-}
+#Workloads: [string]: #Workload
 
 #Workload: {
-	name!:      string
 	container!: #Container
 	endpoints?: [...#Endpoint]
 }
