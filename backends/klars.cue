@@ -69,31 +69,47 @@ volumeMounts: {
 	for k, workload in _workloads
 	let _container = workload.container {
 		"\(k)": [
-			for kv, volume in _container.volumes {
+			for kv, volume in _container.volumes 
+			if volume["secret"] == _|_ {
 				core.#VolumeMount & {
-					name:      "\(k)_\(kv)"
-					mountPath: volume.mount
+					name:      "\(k)_vol_\(kv)"
+					mountPath: path.Dir(volume.mount)
 				}
 			},
 			for kc, config in _container.configs {
 				core.#VolumeMount & {
-					name: "config_\(k)_\(kc)"
+					name: "\(k)_cfg_\(kc)"
 					mountPath: path.Dir(config.mount)
 				}
 			}
-			// TODO: Add support for ConfigMap/Secret
 		]
 	}
 }
 
 volumes: {
 	for k, workload in _workloads
-	let container = workload.container {
+	let _container = workload.container {
 		"\(k)": list.Concat([
-			[for kc, config in container.configs {
+			[for kc, config in _container.configs {
 				core.#Volume & {
-					name: "config_\(k)_\(kc)"
+					name: "\(k)_cfg_\(kc)"
 					configMap: name: "\(k)_\(kc)"
+				}
+			}],
+			[for kv, volume in _container.volumes
+			 if volume["secret"] == _|_ {
+				core.#Volume & {
+					name: "\(k)_vol_\(kv)"
+					if volume["source"] != _|_ {
+						hostPath: {
+							path: volume.source
+						}
+					}
+					if volume["source"] == _|_ {
+						emptyDir: {
+							medium: "Memory"
+						}
+					}
 				}
 			}]
 		])
