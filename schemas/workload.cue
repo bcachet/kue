@@ -41,7 +41,7 @@ import (
 }
 
 #EnvSecret: #Env & {
-	path!: string
+	secret: #Secret
 }
 
 #Image: {
@@ -61,7 +61,11 @@ import (
 }
 
 #VolumeSecret: #Volume & {
-	path!:     string
+	secret: #Secret
+}
+
+#Secret: {
+	kv!:     string
 	engine:    string | *"kv"
 	template?: string
 }

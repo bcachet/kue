@@ -2,17 +2,13 @@ package workloads
 
 import (
 	"encoding/json"
-	schemas "github.com/bcachet/kue/schemas:schemas"
 )
 
-workloads: schemas.#Workloads & {
+workloads: {
 	redis: {
 		container: {
-			image: name: "redis"
-			probes: liveness: {
-				httpGet: {
-					port: 6379
-				}
+			image: {
+				name: "redis"
 			}
 			configs: redis: {
 				data: json.Marshal(
@@ -26,7 +22,9 @@ workloads: schemas.#Workloads & {
 					mount: "/data"
 				}
 				creds: {
-					path:  "redis/password"
+					secret: {
+						kv:    "redis/password"
+					}
 					mount: "/run/secrets/redis_password"
 				}
 			}
@@ -38,13 +36,20 @@ workloads: schemas.#Workloads & {
 					valueFrom: "spec.serviceAccountName"
 				}
 				"my-secret": {
-					path: "my/secret"
+					secret: {
+						kv: "my/secret"
+					}
 				}
 			}
 			resources: {
 				limits: {
 					cpu:    3
 					memory: 1.5Gi
+				}
+			}
+			probes: liveness: {
+				httpGet: {
+					port: 6379
 				}
 			}
 		}

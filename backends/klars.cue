@@ -1,23 +1,26 @@
 package backends
 
 import (
-	// "list"
+	"list"
+	"path"
 	"github.com/bcachet/kue/workloads"
-	// "github.com/bcachet/kue/schemas"
+	"github.com/bcachet/kue/schemas"
 
 	apps "cue.dev/x/k8s.io/api/apps/v1"
 	core "cue.dev/x/k8s.io/api/core/v1"
 )
 
+_workloads: schemas.#Workloads & workloads.workloads
+
 images: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let _image = workload.container.image {
 		"\(k)": *"\(_image.registry)/\(_image.name):\(_image.tag)" | string
 	}
 }
 
 _defaultEnvs: {
-	for k, workload in workloads.workloads {
+	for k, workload in _workloads {
 		"\(k)": [
 			{
 				name: "HOSTNAME"
@@ -27,12 +30,27 @@ _defaultEnvs: {
 	}
 }
 
+configMaps: {
+	for k, workload in _workloads {
+		"\(k)": [
+			for kc, config in workload.container.configs {
+				core.#ConfigMap & {
+					metadata: name: "\(k)_\(kc)"
+					data: {
+						"\(path.Base(config.mount, path.Unix))": config.data
+					}
+				}
+			}
+		]
+	}
+}
+
 envs: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let _envs = workload.container.envs {
 		"\(k)": [
 			for ke, env in _envs
-			if env["path"] == _|_ {
+			if env["secret"] == _|_ {
 				{
 					name: ke
 					if env["value"] != _|_ {
@@ -48,7 +66,7 @@ envs: {
 }
 
 volumeMounts: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let _container = workload.container {
 		"\(k)": [
 			for kv, volume in _container.volumes {
@@ -61,23 +79,23 @@ volumeMounts: {
 }
 
 volumes: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let container = workload.container {
 		"\(k)": []
 	}
 }
 
 containers: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let _container = workload.container
 	let _volumeMounts = volumeMounts[k] {
 		"\(k)": core.#Container & {
 			name:  *k | string
 			image: *images[k] | string
 			env: [
-				for secret in envs[k]
-				if secret.path == _|_ {
-					secret
+				for env in envs[k]
+				if env.secret == _|_ {
+					env
 				},
 			]
 			for kp, probe in _container.probes {
@@ -92,7 +110,7 @@ containers: {
 }
 
 pods: {
-	for k, workload in workloads.workloads
+	for k, workload in _workloads
 	let _pod = containers[k]
 	let _volumes = volumes[k] {
 		"\(k)": core.#PodSpec & {
@@ -106,8 +124,8 @@ pods: {
 	}
 }
 
-manifests: {
-	for k, workload in workloads.workloads {
+daemonsets: {
+	for k, workload in _workloads {
 		"\(k)": apps.#DaemonSet & {
 			metadata: {
 				name: *k | string
@@ -122,6 +140,16 @@ manifests: {
 					spec: pods[k]
 				}
 			}
+		}
+	}
+}
+
+manifests: {
+	for k, workload in _workloads {
+		"\(k)": {
+			kind: "List"
+			apiVersion: "v1"
+			items: list.Concat([[daemonsets[k]], configMaps[k]])
 		}
 	}
 }
