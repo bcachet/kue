@@ -18,26 +18,24 @@ import (
     image!:   #Image
     command?: [...string]
 	args?:    [...string]
-    env?:     [string]: #Env
+    envs?:    [...#Env]
     probes:   [#ProbeType]: core.#Probe
     configs:  [string]: #Config
 	volumes:  [string]: #Volume
 }
 
-#Env: {
-	type!: string | "secret" | "static"
-	if type == "secret" {
-		kv!: string
-	}
+#Env: #EnvVar | #EnvSecret
+
+#EnvVar: core.#EnvVar & {
+
 }
 
-#EnvStatic: #Env & {
-	type: "static"
+#EnvSecret: {
+	name!: string
+	path!: string
 }
 
-#EnvSecret: #Env & {
-	type: "secret"
-}
+#Env
 
 #Image: {
 	registry: string | "docker.io" | *"ghcr.io" | "quay.io"

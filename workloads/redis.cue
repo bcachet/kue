@@ -30,6 +30,16 @@ workloads: schemas.#Workloads & {
 					mount: "/run/secrets/redis_password"
 				}
 			}
+            envs: [
+                schemas.#EnvVar & {
+                    name: "foo"
+                    value: "bar"
+                },
+                schemas.#EnvSecret & {
+                    name: "key"
+                    path: "kv/key"
+                },
+            ]
 		}
 
 		endpoints: [

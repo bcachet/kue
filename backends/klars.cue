@@ -1,6 +1,7 @@
 package backends
 
 import (
+	"list"
 	"github.com/bcachet/kue/workloads"
 	// "github.com/bcachet/kue/schemas"
 
@@ -15,18 +16,45 @@ images: {
 	}
 }
 
+envs: {
+	for k, workload in workloads.workloads
+	let envs = workload.container.envs {
+		"\(k)": list.Concat(
+			[
+				envs,
+				[
+					{
+						name: "HOSTNAME"
+						valueFrom: fieldRef: fieldPath: "spec.nodeName"
+					},
+				],
+			],
+		)
+	}
+}
+
 containers: {
-	for k, workload in workloads.workloads {
+	for k, workload in workloads.workloads
+	let container = workload.container {
 		"\(k)": core.#Container & {
 			name:  *k | string
 			image: *images[k] | string
+			env: [
+				for secret in envs[k]
+				if secret.path == _|_ {
+					secret
+				},
+			]
+			for kp, probe in container.probes {
+				"\(kp)Probe": probe
+			}
 		}
 	}
 }
 
 pods: {
-	for k, workload in workloads.workloads 
-    let mainPod = containers[k] {
+	for k, workload in workloads.workloads
+	let mainPod = containers[k] {
 		"\(k)": core.#PodSpec & {
 			serviceAccountName: *k | string
 			hostNetwork:        *true | bool
