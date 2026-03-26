@@ -68,7 +68,8 @@
         "go": "/home/vscode/.local/share/mise/installs/go/latest/bin/go",
         "gopls": "/home/vscode/.local/share/mise/installs/go-golang-org-x-tools-gopls/latest/bin/gopls",
         "dlv": "/home/vscode/.local/share/mise/installs/go-github-com-go-delve-delve-cmd-dlv/latest/bin/dlv"
-      }
+      },
+      "cue.cueCommand": "/home/vscode/.local/share/mise/installs/cue/latest/cue"
     }
   }
 }

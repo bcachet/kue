@@ -6,7 +6,7 @@ import (
 )
 
 workloads: schemas.#Workloads & {
-	redis: schemas.#Workload & {
+	redis: {
 		container: {
 			image: name: "redis"
 			probes: liveness: {
@@ -14,7 +14,7 @@ workloads: schemas.#Workloads & {
 					port: 6379
 				}
 			}
-			configs: redis: schemas.#Config & {
+			configs: redis: {
 				data: json.Marshal(
 					{
 						foo: "bar"
@@ -22,24 +22,31 @@ workloads: schemas.#Workloads & {
 				mount: "/etc/redis/redis.json"
 			}
 			volumes: {
-				data: schemas.#VolumePersistent & {
+				data: {
 					mount: "/data"
 				}
-				creds: schemas.#VolumeSecret & {
+				creds: {
 					path:  "redis/password"
 					mount: "/run/secrets/redis_password"
 				}
 			}
-            envs: [
-                schemas.#EnvVar & {
-                    name: "foo"
-                    value: "bar"
-                },
-                schemas.#EnvSecret & {
-                    name: "key"
-                    path: "kv/key"
-                },
-            ]
+			envs: {
+				foo: {
+					value: "bar"
+				}
+				sa: {
+					valueFrom: "spec.serviceAccountName"
+				}
+				"my-secret": {
+					path: "my/secret"
+				}
+			}
+			resources: {
+				limits: {
+					cpu:    3
+					memory: 1.5Gi
+				}
+			}
 		}
 
 		endpoints: [

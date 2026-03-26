@@ -15,27 +15,34 @@ import (
 }
 
 #Container: {
-    image!:   #Image
-    command?: [...string]
-	args?:    [...string]
-    envs?:    [...#Env]
-    probes:   [#ProbeType]: core.#Probe
-    configs:  [string]: #Config
-	volumes:  [string]: #Volume
+	image!: #Image
+	command?: [...string]
+	args?: [...string]
+	envs?: [Name=string]: #Env & {
+		name: Name
+	}
+	probes: [#ProbeType]: core.#Probe
+	configs: [string]:    #Config
+	volumes: [string]:    #Volume
+	resources?: core.#ResourceRequirements
 }
 
-#Env: #EnvVar | #EnvSecret
-
-#EnvVar: core.#EnvVar & {
-
-}
-
-#EnvSecret: {
+#Env: {
 	name!: string
+	...
+}
+
+#EnvConstant: #Env & {
+	value: string
+}
+
+#EnvDownward: #Env & {
+	valueFrom: string
+}
+
+#EnvSecret: #Env & {
 	path!: string
 }
-
-#Env
 
 #Image: {
 	registry: string | "docker.io" | *"ghcr.io" | "quay.io"
@@ -44,53 +51,36 @@ import (
 }
 
 #Volume: {
-	type!: "ephemeral" | "persistent" | "bind" | "secret"
-    mount!: string
-    mode:   int | *0o400
-
-    if type == "bind" {
-        source!: string
-    }
-
-	if type == "secret" {
-		path!: string
-		engine: string | *"kv"
-		template?: string
-	}
-}
-
-#VolumeEphemeral: #Volume & {
-    type: "ephemeral"
-}
-
-#VolumePersistent: #Volume & {
-    type: "persistent"
+	mount!: string
+	mode:   int | *0o400
+	...
 }
 
 #VolumeBind: #Volume & {
-    type: "bind"
+	source!: string
 }
 
 #VolumeSecret: #Volume & {
-	type: "secret"
+	path!:     string
+	engine:    string | *"kv"
+	template?: string
 }
 
 #Config: {
-    data!: string | bytes
-    mount!: string
+	data!:  string | bytes
+	mount!: string
 }
 
 #Endpoint: {
-    port!: int
-    containerPort: int | *port
-    certificate: #Certificate
+	port!:         int
+	containerPort: int | *port
+	certificate:   #Certificate
 }
 
 #Certificate: {
-    commonName!: string
-    altNames?: [...string]
-    pki?: string
+	commonName!: string
+	altNames?: [...string]
+	pki?: string
 }
 
 #ProbeType: "liveness" | "readiness" | "startup"
-
