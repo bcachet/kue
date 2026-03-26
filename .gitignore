@@ -18,3 +18,5 @@
 
 !backends/
 !backends/*.cue
+!backends/klars/
+!backends/klars/*.cue
