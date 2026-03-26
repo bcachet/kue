@@ -70,9 +70,17 @@ volumeMounts: {
 	let _container = workload.container {
 		"\(k)": [
 			for kv, volume in _container.volumes {
-				name:      "\(k)_\(kv)"
-				mountPath: volume.mount
+				core.#VolumeMount & {
+					name:      "\(k)_\(kv)"
+					mountPath: volume.mount
+				}
 			},
+			for kc, config in _container.configs {
+				core.#VolumeMount & {
+					name: "config_\(k)_\(kc)"
+					mountPath: path.Dir(config.mount)
+				}
+			}
 			// TODO: Add support for ConfigMap/Secret
 		]
 	}
@@ -81,7 +89,14 @@ volumeMounts: {
 volumes: {
 	for k, workload in _workloads
 	let container = workload.container {
-		"\(k)": []
+		"\(k)": list.Concat([
+			[for kc, config in container.configs {
+				core.#Volume & {
+					name: "config_\(k)_\(kc)"
+					configMap: name: "\(k)_\(kc)"
+				}
+			}]
+		])
 	}
 }
 
