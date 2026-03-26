@@ -12,7 +12,7 @@ manifests: {
 		"\(k)": {
 			kind:       "List"
 			apiVersion: "v1"
-			items:      list.Concat([[klars.daemonsets[k]], klars.configMaps[k]])
+			items: list.Concat([[klars.daemonsets[k]], klars.configMaps[k]])
 		}
 	}
 }

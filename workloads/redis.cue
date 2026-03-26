@@ -23,7 +23,7 @@ workloads: {
 				}
 				creds: {
 					secret: {
-						kv:    "redis/password"
+						kv: "redis/password"
 					}
 					mountPath: "/run/secrets/redis_password"
 				}

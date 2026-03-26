@@ -1,14 +1,9 @@
 package klars
 
-import (
-	"github.com/bcachet/kue/schemas"
-	"github.com/bcachet/kue/workloads"
-
-	core "cue.dev/x/k8s.io/api/core/v1"
-)
+import core "cue.dev/x/k8s.io/api/core/v1"
 
 containers: {
-	for k, workload in schemas.#Workloads & workloads.workloads
+	for k, workload in _workloads
 	let _container = workload.container
 	let _envs = envs[k]
 	let _volumeMounts = volumeMounts[k] {

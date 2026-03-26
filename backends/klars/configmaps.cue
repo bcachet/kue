@@ -1,15 +1,13 @@
 package klars
 
 import (
-    "path"
-    "github.com/bcachet/kue/schemas"
-    "github.com/bcachet/kue/workloads"
+	"path"
 
-    core "cue.dev/x/k8s.io/api/core/v1"
+	core "cue.dev/x/k8s.io/api/core/v1"
 )
 
 configMaps: {
-	for k, workload in schemas.#Workloads & workloads.workloads {
+	for k, workload in _workloads {
 		"\(k)": [
 			for kc, config in workload.container.configs {
 				core.#ConfigMap & {
@@ -18,7 +16,7 @@ configMaps: {
 						"\(path.Base(config.mountPath, path.Unix))": config.data
 					}
 				}
-			}
+			},
 		]
 	}
 }

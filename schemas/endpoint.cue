@@ -8,6 +8,6 @@ package schemas
 
 #Certificate: {
 	commonName!: string
-	altNames?:   [...string]
-	pki?:        string
+	altNames?: [...string]
+	pki?: string
 }
