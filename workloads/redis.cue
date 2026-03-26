@@ -10,7 +10,8 @@ workloads: schemas.#Workloads & {
 		container: {
             image: name: "redis"
             probes: liveness: {
-                type: "tcp"
+                type: "http"
+                path: "/live"
                 port: 6379
             }
             configs: redis: schemas.#Config & {

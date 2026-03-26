@@ -54,7 +54,10 @@ package schemas
 	template?: string
 	if type == "file" {
 		mount!:  string
-		mode?:   int | *0o400
+		mode:   int | *0o400
+	}
+	if type == "env" {
+		name!: string
 	}
     engine:    string | *"kv"
 }
@@ -90,13 +93,19 @@ package schemas
 #Probe: {
     type!: "http" | "tcp" | "grpc" | "exec"
 
-    if type != "exec" {
+	if type != "exec" {
 	    port: int
 	}
 
+	initialDelaySeconds: int & >=0 | *1
+	periodSeconds:       int & >=1 | *10
+	timeoutSeconds:      int & >=1 | *1
+	successThreshold:    int & >=1 | *1
+	failureThreshold:    int & >=1 | *3
+
 	if type == "http" {
 		path!:   string
-		scheme?: *"HTTP" | "HTTPS"
+		scheme: *"HTTP" | "HTTPS"
 		httpHeaders?: [...{
 			name:  string
 			value: string
@@ -110,10 +119,20 @@ package schemas
 	if type == "exec" {
 		command!: [...string]
 	}
+}
 
-	initialDelaySeconds?: int & >=0 | *0
-	periodSeconds?:       int & >=1 | *10
-	timeoutSeconds?:      int & >=1 | *1
-	successThreshold?:    int & >=1 | *1
-	failureThreshold?:    int & >=1 | *3
+#ProbeHttp: #Probe & {
+	type: "http"
+}
+
+#ProbeGrpc: #Probe & {
+	type: "grpc"
+}
+
+#ProbeTcp: #Probe & {
+	type: "tcp"
+}
+
+#ProbeExec: #Probe & {
+	type: "exec"
 }
