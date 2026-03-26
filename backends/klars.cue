@@ -37,7 +37,7 @@ configMaps: {
 				core.#ConfigMap & {
 					metadata: name: "\(k)_\(kc)"
 					data: {
-						"\(path.Base(config.mount, path.Unix))": config.data
+						"\(path.Base(config.mountPath, path.Unix))": config.data
 					}
 				}
 			}
@@ -73,13 +73,13 @@ volumeMounts: {
 			if volume["secret"] == _|_ {
 				core.#VolumeMount & {
 					name:      "\(k)_vol_\(kv)"
-					mountPath: path.Dir(volume.mount)
+					mountPath: path.Dir(volume.mountPath)
 				}
 			},
 			for kc, config in _container.configs {
 				core.#VolumeMount & {
 					name: "\(k)_cfg_\(kc)"
-					mountPath: path.Dir(config.mount)
+					mountPath: path.Dir(config.mountPath)
 				}
 			}
 		]
@@ -105,10 +105,11 @@ volumes: {
 							path: volume.source
 						}
 					}
-					if volume["source"] == _|_ {
+					if volume["source"] == _|_ 
+					let _volume = schemas.#VolumeEphemeral & volume {
 						emptyDir: {
 							medium: "Memory"
-							sizeLimit: *volume.sizeLimit | 5Mi
+							sizeLimit: _volume.sizeLimit
 						}
 					}
 				}

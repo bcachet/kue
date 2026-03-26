@@ -15,17 +15,17 @@ workloads: {
 					{
 						foo: "bar"
 					})
-				mount: "/etc/redis/redis.json"
+				mountPath: "/etc/redis/redis.json"
 			}
 			volumes: {
 				data: {
-					mount: "/data"
+					mountPath: "/data"
 				}
 				creds: {
 					secret: {
 						kv:    "redis/password"
 					}
-					mount: "/run/secrets/redis_password"
+					mountPath: "/run/secrets/redis_password"
 				}
 			}
 			envs: {

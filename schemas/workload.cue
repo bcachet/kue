@@ -16,64 +16,58 @@ import (
 }
 
 #Container: {
-	image!: #Image
-	command?: [...string]
-	args?: [...string]
-	envs?: [Name=string]: #Env
-	probes: [#ProbeType]: core.#Probe
-	configs: [string]:    #Config
-	volumes: [string]:    #Volume
+	image!:    #Image
+	command?:  [...string]
+	args?:     [...string]
+	envs?:     [string]: #Env
+	probes:    [#ProbeType]: core.#Probe
+	configs:   [string]: #Config
+	volumes:   [string]: #Volume
 	resources?: core.#ResourceRequirements
-	security?: core.#SecurityContext
+	security?:  core.#SecurityContext
 }
 
 #Image: {
-	registry: string | "docker.io" | *"ghcr.io" | "quay.io"
+	registry: "docker.io" | *"ghcr.io" | "quay.io"
 	name!:    string
 	tag:      string | *"latest"
 }
 
-
 #Config: {
 	data!:  string | bytes
-	mount!: string
+	mountPath!: string
 }
 
 #Endpoint: {
-	port!:         int
-	containerPort: int | *port
-	certificate:   #Certificate
+	port!:         >0 & <=65535
+	containerPort: (>0 & <=65535) | *port
+	certificate?:  #Certificate
 }
 
 #Certificate: {
 	commonName!: string
-	altNames?: [...string]
-	pki?: string
+	altNames?:   [...string]
+	pki?:        string
 }
 
 #ProbeType: "liveness" | "readiness" | "startup"
-#Probe:core.#Probe
 
-#Env: {
-	...
-}
+#Env: #EnvConstant | #EnvDownward | #EnvSecret
 
-#EnvConstant: #Env & {
+#EnvConstant: {
 	value: string
 }
 
-#EnvDownward: #Env & {
+#EnvDownward: {
 	valueFrom: string
 }
 
-// #EnvSecret: #Env & {
-// 	secret: #Secret
-// }
-
+#EnvSecret: {
+	secret: #Secret
+}
 
 #Volume: {
-	mount!: string
-	mode:   int | *0o400
+	mountPath!: string
 	...
 }
 
@@ -81,16 +75,16 @@ import (
 	source!: string
 }
 
-// #VolumeSecret: #Volume & {
-// 	secret: #Secret
-// }
-
-#VolumeEphemeral: #Volume & {
-	sizeLimit: resource.#Quantity
+#VolumeSecret: #Volume & {
+	secret: #Secret
 }
 
-// #Secret: {
-// 	kv!:     string
-// 	engine:    string | *"kv"
-// 	template?: string
-// }
+#VolumeEphemeral: #Volume & {
+	sizeLimit:  resource.#Quantity | *5Mi
+}
+
+#Secret: {
+	kv!:       string
+	engine:    string | *"kv"
+	template?: string
+}
